@@ -28,7 +28,7 @@ CREATE TABLE moves
     id int identity NOT NULL,
     board int NOT NULL,
     cell int NOT NULL,
-    piece char(1) NOT NULL,
+    piece int NOT NULL,
     CONSTRAINT chk_board CHECK (board > 0 and board <= 9),
     CONSTRAINT chk_cell CHECK (cell > 0 and cell <= 9),
     CONSTRAINT chk_piece CHECK (piece in ('X', 'O')),
