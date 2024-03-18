@@ -482,3 +482,6 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+/wwwroot/js/main.js
+/wwwroot/js/index.html
