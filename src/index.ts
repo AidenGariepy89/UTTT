@@ -13,7 +13,7 @@ function sendMove(move: Move) {
     const json = JSON.stringify(move);
 
     conn.send("submitMove", json)
-        .then(() => console.log("Sent successfully"))
+        // .then(() => console.log("Sent successfully"))
         .catch(err => console.error("Sent unsuccessfully: ", err));
 }
 
@@ -28,3 +28,5 @@ function recieveMove(json: string) {
 }
 
 conn.on("announceMove", recieveMove);
+
+ultimate.activate(5, 3);

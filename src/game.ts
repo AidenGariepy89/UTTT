@@ -32,6 +32,10 @@ class Cell {
         this.cellElement.innerHTML = pieceTypeToString(value);
         this.value = value;
     }
+
+    activate() {
+        this.cellElement.classList.toggle("activate");
+    }
 }
 
 class Board {
@@ -82,6 +86,10 @@ class Board {
     playMove(move: Move) {
         this.cells[move.cell].setCell(move.piece);
     }
+
+    activate(cell: number) {
+        this.cells[cell].activate();
+    }
 }
 
 export class UltimateBoard {
@@ -121,12 +129,13 @@ export class UltimateBoard {
     cellClicked(boardId: number, cellId: number) {
         const move = new Move();
         move.piece = PieceType.X;
-        move.cell = (boardId * this.BOARD_DIM) + cellId;
+        move.board = boardId;
+        move.cell = cellId;
 
         for (let i = 0; i < this.listeners.length; i++) {
-            let listener = this.listeners[i];
-
-            listener(move);
+            // let listener = this.listeners[i];
+            // listener(move);
+            this.listeners[i](move);
         }
     }
 
@@ -136,6 +145,10 @@ export class UltimateBoard {
 
     addListener(listener: (m: Move) => void) {
         this.listeners.push(listener);
+    }
+
+    activate(board: number, cell: number) {
+        this.subBoards[board].activate(cell);
     }
 }
 

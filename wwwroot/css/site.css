@@ -1,3 +1,12 @@
+:root {
+    --col0: #ffffff;
+    --col1: #707070;
+    --col2: #12bcff;
+    --col3: #d4d4d4;
+    --col4: #ededed;
+    --col-activate: #cfe6ff;
+}
+
 html {
     font-size: 14px;
     font-family: Arial, Helvetica, sans-serif;
@@ -23,6 +32,8 @@ html {
 body {
     margin: 0;
     height: 100%;
+
+    background: var(--col0);
 }
 
 #board-container {
@@ -41,8 +52,9 @@ body {
     grid-template-rows: 1fr 1fr 1fr;
     grid-template-columns: 1fr 1fr 1fr;
 
-    background: lime;
-    gap: 4px;
+    background: var(--col1);
+    border-radius: 3px;
+    gap: 6px;
     padding: 5px;
 }
 
@@ -51,15 +63,17 @@ body {
     grid-template-columns: 1fr 1fr 1fr;
     grid-template-rows: 1fr 1fr 1fr;
 
-    background: red;
-    gap: 2px;
+    background: var(--col2);
+    border-radius: 3px;
+    gap: 5px;
     padding: 3px;
 }
 
 .cell {
-    background: blue;
+    background: var(--col3);
+    border-radius: 2px;
 
-    color: white;
+    color: black;
     font-size: 24pt;
 
     display: flex;
@@ -68,5 +82,9 @@ body {
 }
 
 .cell:hover {
-    background: aqua;
+    background: var(--col4);
+}
+
+.cell.activate {
+    background: var(--col-activate);
 }
