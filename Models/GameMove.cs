@@ -5,6 +5,8 @@ namespace UTTT.Models;
 
 public partial class GameMove
 {
+    public int Id { get; set; }
+
     public int GameId { get; set; }
 
     public int MoveId { get; set; }

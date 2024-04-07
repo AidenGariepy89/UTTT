@@ -1,15 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace UTTT.Models;
 
 public partial class Player
 {
+    [DatabaseGeneratedAttribute(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
 
     public string Username { get; set; } = null!;
 
-    public string PwdHash { get; set; } = null!;
+    public virtual ICollection<Conn> Conns { get; set; } = new List<Conn>();
 
     public virtual ICollection<Game> GameOPlayerNavigations { get; set; } = new List<Game>();
 
