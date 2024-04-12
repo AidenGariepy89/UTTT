@@ -24,7 +24,7 @@ create table lobby (
 );
 
 create table game (
-    id int identity primary key,
+    id int primary key,
     x_player int not null,
     o_player int not null,
     winner int null,
