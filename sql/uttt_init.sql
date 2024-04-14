@@ -34,14 +34,14 @@ create table game (
 );
 
 create table moves (
-    id int identity primary key,
+    id int primary key,
     board int not null,
     cell int not null,
     piece char(1) not null
 );
 
 create table game_moves (
-    id int identity primary key,
+    id int primary key,
     game_id int not null,
     move_id int not null,
     turn int not null,

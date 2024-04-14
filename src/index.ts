@@ -1,5 +1,5 @@
 import * as signalR from "@microsoft/signalr";
-import { Move, UltimateBoard } from "./game";
+import { Move, PieceType, UltimateBoard, stringToPieceType } from "./game";
 import { infoLoading, ultimateBoard } from "./ui";
 
 const enum GameState {
@@ -16,11 +16,24 @@ type GameData = {
     display: HTMLElement;
     username: string;
     board: UltimateBoard | undefined;
-}
+};
+
+type JoinGamePacket = {
+    gameId: number;
+    playerPiece: string;
+};
+
+type MovePacket = {
+    gameId: number;
+    board: number;
+    cell: number;
+    playerPiece: string;
+    // move: Move;
+};
 
 function fatalError(err: any) {
-    alert(err);
-    // window.location.assign("game/gameerror");
+    // alert(err);
+    window.location.assign("game/gameerror?msg=" + err);
 }
 
 let username = prompt("Username: ");
@@ -62,7 +75,7 @@ function setupGame(data: GameData) {
         })
         .catch(fatalError);
 
-    data.conn.on("joinGame", (stuff) => { joinGame(stuff, data); });
+    data.conn.on("joinGame", (joinGameJson) => { joinGame(joinGameJson); });
     data.conn.on("clientError", fatalError);
     data.conn.on("serverMsg", serverMsg);
     data.conn.on("announceMove", recieveMove);
@@ -72,24 +85,37 @@ function serverMsg(msg: any) {
     console.log("Server: " + msg);
 }
 
-function joinGame(player: string, data: GameData) {
+function joinGame(joinGameJson: string) {
+    let packet: JoinGamePacket = JSON.parse(joinGameJson);
+
+    let player = stringToPieceType(packet.playerPiece);
+    if (player == undefined) {
+        fatalError("Undefined piece type from server");
+    }
     console.log("Player: " + player);
 
-    data.state = GameState.Playing;
-    data.conn.send("leaveLobby").catch(fatalError);
-    data.display.replaceChildren(ultimateBoard());
+    gameData.state = GameState.Playing;
+    gameData.conn.send("leaveLobby").catch(fatalError);
+    gameData.display.replaceChildren(ultimateBoard());
 
-    createBoard();
+    createBoard(packet.gameId, player);
 }
 
-function createBoard() {
+function createBoard(gameId: number, player: PieceType) {
     const boardElement = document.getElementById("ultimate-board");
-    gameData.board = new UltimateBoard(1, boardElement);
+    gameData.board = new UltimateBoard(gameId, boardElement, player);
     gameData.board.addListener(sendMove);
 }
 
-function sendMove(move: Move) {
-    const json = JSON.stringify(move);
+function sendMove(gameId: number, move: Move) {
+    const packet: MovePacket = {
+        gameId: gameId,
+        board: move.board,
+        cell: move.cell,
+        playerPiece: move.piece,
+    };
+
+    const json = JSON.stringify(packet);
 
     gameData.conn.send("submitMove", json)
         // .then(() => console.log("Sent successfully"))
@@ -101,29 +127,12 @@ function recieveMove(json: string) {
         return;
     }
 
-    const move: Move = JSON.parse(json);
+    const packet: MovePacket = JSON.parse(json);
+
+    const move: Move = new Move;
+    move.board = packet.board;
+    move.cell = packet.cell;
+    move.piece = stringToPieceType(packet.playerPiece);
+
     gameData.board.playMove(move);
 }
-
-// const conn = new signalR.HubConnectionBuilder()
-//     .withUrl("/uttt")
-//     .build();
-//
-// conn.start()
-//     .then(() => console.log("Established connection."))
-//     .catch(err => console.error("Connection failed: ", err));
-//
-//
-// const board_element = document.getElementById('ultimate-board');
-// const ultimate = new UltimateBoard(1, board_element);
-// ultimate.addListener(sendMove);
-//
-// function recieveMove(json: string) {
-//     const move: Move = JSON.parse(json);
-//
-//     ultimate.playMove(move);
-// }
-//
-// conn.on("announceMove", recieveMove);
-//
-// ultimate.activate(5, 3);

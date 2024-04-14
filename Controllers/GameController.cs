@@ -20,8 +20,9 @@ public class GameController : Controller
         return View();
     }
 
-    public IActionResult GameError()
+    public IActionResult GameError(string msg)
     {
+        ViewData.Add("msg", msg);
         return View();
     }
 

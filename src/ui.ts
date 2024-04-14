@@ -27,9 +27,14 @@ export function ultimateBoard(): HTMLDivElement {
     const boardContainer = document.createElement("div");
     boardContainer.id = "board-container";
 
+    const infoText = document.createElement("h2");
+    infoText.id = "info-text";
+    infoText.innerHTML = "[placeholder]";
+
     const ultimateBoard = document.createElement("div");
     ultimateBoard.id = "ultimate-board";
 
+    boardContainer.appendChild(infoText);
     boardContainer.appendChild(ultimateBoard);
 
     return boardContainer;

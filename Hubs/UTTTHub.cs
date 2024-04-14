@@ -98,7 +98,22 @@ public class UTTTHub : Hub
 
     public async Task SubmitMove(string json)
     {
-        Console.WriteLine(json);
+        int gameId;
+        Move move;
+
+        if (!Utils.UnmarshalMovePacket(json, out gameId, out move))
+        {
+            throw new Exception("SubmitMove packet in invalid format!");
+        }
+
+        Game? game = await _context.Games.FindAsync(gameId);
+        if (game is null)
+        {
+            await Clients.Caller.SendAsync("clientError", "Unknown game id");
+            return;
+        }
+
+        await SaveMove(game, move);
 
         await Clients.All.SendAsync("announceMove", json);
     }
@@ -160,7 +175,41 @@ public class UTTTHub : Hub
         _context.Games.Add(game);
         await _context.SaveChangesAsync();
 
-        await Clients.Client(otherPlayer.ConnId).SendAsync("joinGame", "X");
-        await Clients.Caller.SendAsync("joinGame", "O");
+        string xPlayerPacket = Utils.CreateJoinGamePacket(game, "X");
+        string oPlayerPacket = Utils.CreateJoinGamePacket(game, "O");
+
+        await Clients.Client(otherPlayer.ConnId).SendAsync("joinGame", xPlayerPacket);
+        await Clients.Caller.SendAsync("joinGame", oPlayerPacket);
+    }
+
+    private async Task SaveMove(Game game, Move move)
+    {
+        var moveQuery = _context.Moves
+            .FromSql($"select * from moves where board = {move.Board} and cell = {move.Cell} and piece = {move.Piece}");
+
+        Move moveToUse;
+
+        if (await moveQuery.CountAsync() == 0)
+        {
+            moveToUse = move;
+            moveToUse.Id = await _context.Moves.CountAsync() + 1;
+            _context.Moves.Add(moveToUse);
+        }
+        else
+        {
+            moveToUse = await moveQuery.FirstAsync();
+        }
+
+        int movesInGame = await _context.GameMoves.FromSql($"select * from game_moves where game_id = {game.Id}").CountAsync();
+
+        var gm = new GameMove();
+        gm.Id = await _context.GameMoves.CountAsync() + 1;
+        gm.GameId = game.Id;
+        gm.MoveId = moveToUse.Id;
+        gm.Turn = movesInGame + 1;
+
+        _context.GameMoves.Add(gm);
+
+        await _context.SaveChangesAsync();
     }
 }
