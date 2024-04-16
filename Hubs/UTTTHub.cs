@@ -30,9 +30,11 @@ public class UTTTHub : Hub
             await _context.SaveChangesAsync();
         }
 
-        await _context.Conns
-            .FromSql($"select * from conn where conn_id = {Context.ConnectionId}")
-            .ForEachAsync(conn => _context.Conns.Remove(conn));
+        var oldConn = await _context.Conns.FindAsync(Context.ConnectionId);
+        if (oldConn is not null)
+        {
+            _context.Conns.Remove(oldConn);
+        }
 
         await _context.SaveChangesAsync();
         await base.OnDisconnectedAsync(exception);
@@ -47,13 +49,8 @@ public class UTTTHub : Hub
             return;
         }
 
-        // Check if player exists
-        var playerQuery = await _context.Players
-            .FromSql($"select * from player where username = {username}")
-            .ToListAsync();
-
         Player player;
-
+        var playerQuery = await _context.Players.Where(p => p.Username == username).ToListAsync();
         if (playerQuery.Count() == 0)
         {
             player = new Player();
@@ -115,7 +112,39 @@ public class UTTTHub : Hub
 
         await SaveMove(game, move);
 
-        await Clients.All.SendAsync("announceMove", json);
+        Conn?[] conns = [
+            game.GetXPlayer(_context).GetConn(_context),
+            game.GetOPlayer(_context).GetConn(_context),
+        ];
+        bool playerDisconnected = false;
+        var existingConns = new List<Conn>();
+
+        foreach (var conn in conns)
+        {
+            if (conn is null)
+            {
+                playerDisconnected = true;
+            }
+            else
+            {
+                existingConns.Add(conn);
+            }
+        }
+
+        // Handle disconnection
+        if (playerDisconnected)
+        {
+            foreach (var conn in existingConns)
+            {
+                await Clients.Client(conn.ConnId).SendAsync("clientError", "Player disconnected");
+            }
+            return;
+        }
+
+        foreach (var conn in existingConns)
+        {
+            await Clients.Client(conn.ConnId).SendAsync("announceMove", json);
+        }
     }
 
     public async Task LeaveLobby()

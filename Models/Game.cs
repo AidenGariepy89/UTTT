@@ -20,4 +20,14 @@ public partial class Game
     public virtual Player? WinnerNavigation { get; set; }
 
     public virtual Player XPlayerNavigation { get; set; } = null!;
+
+    public Player GetXPlayer(UTTTContext context)
+    {
+        return context.Players.Where(p => p.Id == this.XPlayer).First();
+    }
+
+    public Player GetOPlayer(UTTTContext context)
+    {
+        return context.Players.Where(p => p.Id == this.OPlayer).First();
+    }
 }

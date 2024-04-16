@@ -18,4 +18,16 @@ public partial class Player
     public virtual ICollection<Game> GameWinnerNavigations { get; set; } = new List<Game>();
 
     public virtual ICollection<Game> GameXPlayerNavigations { get; set; } = new List<Game>();
+
+    public Conn? GetConn(UTTTContext context)
+    {
+        List<Conn> connQuery = context.Conns.Where(conn => conn.PlayerId == this.Id).ToList();
+
+        if (connQuery.Count == 0)
+        {
+            return null;
+        }
+
+        return connQuery.First();
+    }
 }

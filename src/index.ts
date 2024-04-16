@@ -28,7 +28,6 @@ type MovePacket = {
     board: number;
     cell: number;
     playerPiece: string;
-    // move: Move;
 };
 
 function fatalError(err: any) {

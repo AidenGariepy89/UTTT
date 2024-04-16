@@ -137,8 +137,10 @@ export class UltimateBoard {
 
         if (this.player == PieceType.X) {
             this.state = PlayState.YourTurn;
+            this.setInfo("Your turn!");
         } else {
             this.state = PlayState.OtherTurn;
+            this.setInfo("Their turn!");
         }
 
         for (let i = 0; i < this.BOARD_DIM; i++) {
@@ -178,8 +180,10 @@ export class UltimateBoard {
     playMove(move: Move) {
         if (move.piece == this.player) {
             this.state = PlayState.OtherTurn;
+            this.setInfo("Their turn!");
         } else {
             this.state = PlayState.YourTurn;
+            this.setInfo("Your turn!");
         }
 
         this.subBoards[move.board].playMove(move);
