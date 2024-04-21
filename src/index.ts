@@ -30,8 +30,12 @@ type MovePacket = {
     playerPiece: string;
 };
 
+type GameOverPacket = {
+    gameId: number;
+    playerPiece: string;
+};
+
 function fatalError(err: any) {
-    // alert(err);
     window.location.assign("game/gameerror?msg=" + err);
 }
 
@@ -103,7 +107,8 @@ function joinGame(joinGameJson: string) {
 function createBoard(gameId: number, player: PieceType) {
     const boardElement = document.getElementById("ultimate-board");
     gameData.board = new UltimateBoard(gameId, boardElement, player);
-    gameData.board.addListener(sendMove);
+    gameData.board.addMoveListener(sendMove);
+    gameData.board.addWinListener(handleWin);
 }
 
 function sendMove(gameId: number, move: Move) {
@@ -134,4 +139,16 @@ function recieveMove(json: string) {
     move.piece = stringToPieceType(packet.playerPiece);
 
     gameData.board.playMove(move);
+}
+
+function handleWin(gameId: number, winner: PieceType) {
+    let packet: GameOverPacket = {
+        gameId: gameId,
+        playerPiece: winner,
+    };
+
+    let json = JSON.stringify(packet);
+
+    gameData.state = GameState.GameOver;
+    gameData.conn.send("gameOver", json);
 }

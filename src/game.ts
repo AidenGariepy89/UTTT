@@ -1,3 +1,14 @@
+const WinStates: number[] = [
+    0b111000000,
+    0b000111000,
+    0b000000111,
+    0b100100100,
+    0b010010010,
+    0b001001001,
+    0b100010001,
+    0b001010100,
+];
+
 export const enum PieceType {
     Empty = "",
     X = "X",
@@ -47,7 +58,31 @@ class Cell {
     }
 
     activate() {
-        this.cellElement.classList.toggle("activate");
+        this.cellElement.classList.add("activated");
+    }
+
+    disable() {
+        this.cellElement.classList.add("disabled");
+    }
+
+    highlight() {
+        this.cellElement.classList.add("highlight");
+    }
+
+    xTaken() {
+        this.cellElement.classList.add("x-taken");
+    }
+
+    oTaken() {
+        this.cellElement.classList.add("o-taken");
+    }
+
+    clear() {
+        this.cellElement.classList.remove("activated");
+        this.cellElement.classList.remove("disabled");
+        this.cellElement.classList.remove("highlight");
+        this.cellElement.classList.remove("x-taken");
+        this.cellElement.classList.remove("o-taken");
     }
 }
 
@@ -56,6 +91,7 @@ class Board {
     boardElement: HTMLElement;
     cells: Cell[];
     parentBoard: UltimateBoard;
+    winner: PieceType;
 
     readonly BOARD_DIM = 9;
 
@@ -68,6 +104,7 @@ class Board {
         this.boardElement = boardElement;
         this.cells = [];
         this.parentBoard = parentBoard;
+        this.winner = PieceType.Empty;
 
         for (let i = 0; i < this.BOARD_DIM; i++) {
             this.cells.push(this.createCell());
@@ -100,8 +137,39 @@ class Board {
         this.cells[move.cell].setCell(move.piece);
     }
 
-    activate(cell: number) {
-        this.cells[cell].activate();
+    winCheck(): PieceType {
+        let xState = 0;
+        let oState = 0;
+        for (let i = 0; i < this.BOARD_DIM; i++) {
+            xState <<= 1;
+            oState <<= 1;
+
+            if (this.cells[i].value === PieceType.X) {
+                xState ^= 1;
+            } else if (this.cells[i].value === PieceType.O) {
+                oState ^= 1;
+            }
+        }
+
+        console.log("X: " + xState.toString(2));
+        console.log("O: " + oState.toString(2));
+
+        let winner = PieceType.Empty;
+
+        for (let i = 0; i < WinStates.length; i++) {
+            if ((xState & WinStates[i]) === WinStates[i]) {
+                winner = PieceType.X;
+                break;
+            }
+            if ((oState & WinStates[i]) === WinStates[i]) {
+                winner = PieceType.O;
+                break;
+            }
+        }
+
+        this.winner = winner;
+
+        return winner;
     }
 }
 
@@ -113,11 +181,16 @@ const enum PlayState {
 
 export class UltimateBoard {
     gameId: number;
+    player: PieceType;
+
     boardElement: HTMLElement;
     infoTextElement: HTMLElement;
+
     subBoards: Board[];
-    listeners: ((gameId: number, m: Move) => void)[];
-    player: PieceType;
+    currentSubBoard: number;
+    
+    moveListeners: ((gameId: number, m: Move) => void)[];
+    winListeners: ((gameId: number, winner: PieceType) => void)[];
 
     state: PlayState;
 
@@ -129,22 +202,25 @@ export class UltimateBoard {
         player: PieceType
     ) {
         this.gameId = gameId;
-        this.boardElement = boardElement;
-        this.infoTextElement = document.getElementById("info-text");
-        this.subBoards = [];
-        this.listeners = [];
         this.player = player;
 
-        if (this.player == PieceType.X) {
-            this.state = PlayState.YourTurn;
-            this.setInfo("Your turn!");
-        } else {
-            this.state = PlayState.OtherTurn;
-            this.setInfo("Their turn!");
-        }
+        this.boardElement = boardElement;
+        this.infoTextElement = document.getElementById("info-text");
+
+        this.subBoards = [];
+        this.currentSubBoard = -1;
+
+        this.moveListeners = [];
+        this.winListeners = [];
 
         for (let i = 0; i < this.BOARD_DIM; i++) {
             this.subBoards.push(this.createSubBoard());
+        }
+
+        if (this.player == PieceType.X) {
+            this.yourTurn(undefined);
+        } else {
+            this.otherTurn();
         }
     }
 
@@ -165,40 +241,160 @@ export class UltimateBoard {
             return;
         }
 
+        if (this.currentSubBoard != -1 && this.currentSubBoard != boardId) {
+            return;
+        }
+
+        if (this.subBoards[boardId].winner !== PieceType.Empty) {
+            return;
+        }
+
         const move = new Move();
         move.piece = this.player;
         move.board = boardId;
         move.cell = cellId;
 
-        for (let i = 0; i < this.listeners.length; i++) {
-            // let listener = this.listeners[i];
-            // listener(move);
-            this.listeners[i](this.gameId, move);
+        for (let i = 0; i < this.moveListeners.length; i++) {
+            this.moveListeners[i](this.gameId, move);
         }
     }
 
     playMove(move: Move) {
+        this.subBoards[move.board].playMove(move);
+
+        let result = this.winCheck();
+
+        this.clearBoard();
+        this.subBoards[move.board].cells[move.cell].highlight();
+
         if (move.piece == this.player) {
-            this.state = PlayState.OtherTurn;
-            this.setInfo("Their turn!");
+            this.otherTurn();
         } else {
-            this.state = PlayState.YourTurn;
-            this.setInfo("Your turn!");
+            this.yourTurn(move);
         }
 
-        this.subBoards[move.board].playMove(move);
+        if (result !== PieceType.Empty) {
+            this.win(result);
+        }
     }
 
-    addListener(listener: (gameId: number, m: Move) => void) {
-        this.listeners.push(listener);
+    addMoveListener(listener: (gameId: number, m: Move) => void) {
+        this.moveListeners.push(listener);
+    }
+
+    addWinListener(listener: (gameId: number, winner: PieceType) => void) {
+        this.winListeners.push(listener);
     }
 
     activate(board: number, cell: number) {
-        this.subBoards[board].activate(cell);
+        this.subBoards[board].cells[cell].activate();
     }
 
     setInfo(msg: string) {
         this.infoTextElement.innerHTML = msg;
+    }
+
+    otherTurn() {
+        this.state = PlayState.OtherTurn;
+        this.setInfo("Their turn!");
+
+        for (let i = 0; i < this.BOARD_DIM; i++) {
+            for (let j = 0; j < this.BOARD_DIM; j++) {
+                this.subBoards[i].cells[j].disable();
+            }
+        }
+    }
+
+    yourTurn(move: Move | undefined) {
+        this.state = PlayState.YourTurn;
+        this.setInfo("Your turn!");
+
+        if (move === undefined) {
+            return;
+        }
+
+        this.currentSubBoard = move.cell;
+        if (this.subBoards[this.currentSubBoard].winner === PieceType.Empty) {
+            for (let i = 0; i < this.BOARD_DIM; i++) {
+                for (let j = 0; j < this.BOARD_DIM; j++) {
+                    if (i == this.currentSubBoard) {
+                        continue;
+                    }
+
+                    this.subBoards[i].cells[j].disable();
+                }
+            }
+        } else {
+            this.currentSubBoard = -1;
+        }
+    }
+
+    clearBoard() {
+        for (let i = 0; i < this.BOARD_DIM; i++) {
+            for (let j = 0; j < this.BOARD_DIM; j++) {
+                this.subBoards[i].cells[j].clear();
+            }
+        }
+
+        for (let i = 0; i < this.BOARD_DIM; i++) {
+            if (this.subBoards[i].winner === PieceType.Empty) {
+                continue;
+            }
+
+            for (let j = 0; j < this.BOARD_DIM; j++) {
+                if (this.subBoards[i].winner === PieceType.X) {
+                    this.subBoards[i].cells[j].xTaken();
+                } else if (this.subBoards[i].winner === PieceType.O) {
+                    this.subBoards[i].cells[j].oTaken();
+                }
+            }
+        }
+    }
+
+    winCheck(): PieceType {
+        let xWins = 0;
+        let oWins = 0;
+
+        for (let i = 0; i < this.BOARD_DIM; i++) {
+            xWins <<= 1;
+            oWins <<= 1;
+
+            let result = this.subBoards[i].winCheck();
+            if (result === PieceType.X) {
+                xWins ^= 1;
+            } else if (result === PieceType.O) {
+                oWins ^= 1;
+            }
+        }
+
+        for (let i = 0; i < WinStates.length; i++) {
+            if ((xWins & WinStates[i]) === WinStates[i]) {
+                return PieceType.X;
+            }
+            if ((oWins & WinStates[i]) === WinStates[i]) {
+                return PieceType.O;
+            }
+        }
+
+        return PieceType.Empty;
+    }
+
+    win(winner: PieceType) {
+        if (winner === PieceType.X) {
+            this.state = PlayState.GameOver;
+        } else if (winner === PieceType.O) {
+            this.state = PlayState.GameOver;
+        }
+
+        if (winner === this.player) {
+            this.setInfo("You win!!!");
+        } else {
+            this.setInfo("You lose!!!");
+        }
+        
+        for (let i = 0; i < this.winListeners.length; i++) {
+            this.winListeners[i](this.gameId, winner);
+        }
     }
 }
 

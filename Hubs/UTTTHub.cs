@@ -161,6 +161,41 @@ public class UTTTHub : Hub
         await Clients.Caller.SendAsync("serverMsg", "Left lobby");
     }
 
+    public async Task GameOver(string json)
+    {
+        Console.WriteLine(json);
+
+        int gameId;
+        string winner;
+
+        if (!Utils.UnmarshalGameOverPacket(json, out gameId, out winner))
+        {
+            throw new Exception("GameOver packet in invalid format!");
+        }
+
+        Game? game = await _context.Games.FindAsync(gameId);
+        if (game is null)
+        {
+            await Clients.Caller.SendAsync("clientError", "Unknown gameId");
+            return;
+        }
+
+        if (winner == "X")
+        {
+            game.Winner = game.GetXPlayer(_context).Id;
+        }
+        else if (winner == "O")
+        {
+            game.Winner = game.GetOPlayer(_context).Id;
+        }
+        else
+        {
+            throw new Exception("Hey, that's a bug!");
+        }
+
+        await _context.SaveChangesAsync();
+    }
+
     private void JoinLobby(Conn conn)
     {
         if (_context.Lobbies.Find(conn.ConnId) is not null)

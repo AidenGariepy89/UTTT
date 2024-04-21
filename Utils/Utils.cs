@@ -11,6 +11,12 @@ public static class Utils
         public string playerPiece { get; set; } = null!;
     }
 
+    private class GameOverPacket
+    {
+        public int gameId { get; set; }
+        public string playerPiece { get; set; } = null!;
+    }
+
     public static string CreateJoinGamePacket(Game game, string playerPiece)
     {
         return "{\"gameId\":" + game.Id + ",\"playerPiece\":\"" + playerPiece + "\"}";
@@ -42,6 +48,23 @@ public static class Utils
         move.Board = packet.board;
         move.Cell = packet.cell;
         move.Piece = packet.playerPiece;
+
+        return true;
+    }
+
+    public static bool UnmarshalGameOverPacket(string json, out int gameId, out string winner)
+    {
+        gameId = -1;
+        winner = "";
+
+        var packet = JsonSerializer.Deserialize<GameOverPacket>(json);
+        if (packet is null)
+        {
+            return false;
+        }
+
+        gameId = packet.gameId;
+        winner = packet.playerPiece;
 
         return true;
     }

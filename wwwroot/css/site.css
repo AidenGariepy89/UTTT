@@ -5,6 +5,10 @@
     --col3: #d4d4d4;
     --col4: #ededed;
     --col-activate: #cfe6ff;
+    --col-disabled: #a9bacc;
+    --col-highlight: #b8fce1;
+    --col-x: #69ff87;
+    --col-o: #e369ff;
 }
 
 html {
@@ -102,8 +106,24 @@ body {
     background: var(--col4);
 }
 
-.cell.activate {
+.cell.disabled {
+    background: var(--col-disabled);
+}
+
+.cell.activated {
     background: var(--col-activate);
+}
+
+.cell.highlight {
+    background: var(--col-highlight);
+}
+
+.cell.x-taken {
+    background: var(--col-x);
+}
+
+.cell.o-taken {
+    background: var(--col-o);
 }
 
 /* Spinner */
