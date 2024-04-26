@@ -485,3 +485,5 @@ $RECYCLE.BIN/
 
 /wwwroot/js/main.js
 /wwwroot/js/index.html
+
+/appsettings.Development.json
