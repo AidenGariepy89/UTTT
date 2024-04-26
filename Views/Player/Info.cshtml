@@ -1,0 +1,48 @@
+@{
+    ViewData["Title"] = "Players";
+}
+
+<div id="topbar">
+    <a href="/player">Back</a>
+</div>
+
+<div id="landing">
+    <h1>@Model.Player.Username</h1>
+</div>
+
+<div id="flex-container">
+    <div id="flex-content">
+        <div id="scoreboard">
+            <div>
+                <span class="wins">@Model.GamesWon</span>
+                :
+                <span class="losses">@Model.GamesLost</span>
+            </div>
+        </div>
+
+        <h3>Games Played</h3>
+        <div id="playerinfo">
+            @foreach (var game in Model.Games) {
+                @if (game.Winner is null) {
+                    <a href="/game/info?gameId=@game.Id" class='game-info no-winner'>
+                        <b>@game.XPlayerNavigation.Username</b>
+                        &nbspvs&nbsp
+                        <b>@game.OPlayerNavigation.Username</b>
+                    </a>
+                } else if (game.Winner == Model.Player.Id) {
+                    <a href="/game/info?gameId=@game.Id" class='game-info winner'>
+                        <b>@game.XPlayerNavigation.Username</b>
+                        &nbspvs&nbsp
+                        <b>@game.OPlayerNavigation.Username</b>
+                    </a>
+                } else {
+                    <a href="/game/info?gameId=@game.Id" class='game-info loser'>
+                        <b>@game.XPlayerNavigation.Username</b>
+                        &nbspvs&nbsp
+                        <b>@game.OPlayerNavigation.Username</b>
+                    </a>
+                }
+            }
+        </div>
+    </div>
+</div>

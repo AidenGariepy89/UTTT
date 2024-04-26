@@ -1,6 +1,7 @@
 import * as signalR from "@microsoft/signalr";
 import { Move, PieceType, UltimateBoard, stringToPieceType } from "./game";
 import { infoLoading, ultimateBoard } from "./ui";
+import { fatalError } from "./utils";
 
 const enum GameState {
     None,
@@ -35,26 +36,21 @@ type GameOverPacket = {
     playerPiece: string;
 };
 
-function fatalError(err: any) {
-    window.location.assign("game/gameerror?msg=" + err);
-}
-
 let username = prompt("Username: ");
-if (username == "") {
-    username = "aiden";
+
+if (username === undefined
+    || username === null
+    || username == "") {
+    fatalError("No username given");
 }
 
-const gameData: GameData = {
+const gameData = {
     state: GameState.None,
     conn: undefined,
     display: document.getElementById("display"),
     username: username,
     board: undefined,
 };
-
-if (gameData.username == "") {
-    fatalError("No username provided");
-}
 
 setupGame(gameData);
 
@@ -122,7 +118,6 @@ function sendMove(gameId: number, move: Move) {
     const json = JSON.stringify(packet);
 
     gameData.conn.send("submitMove", json)
-        // .then(() => console.log("Sent successfully"))
         .catch(err => console.error("Sent unsuccessfully: ", err));
 }
 

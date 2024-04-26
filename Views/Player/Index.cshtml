@@ -1,0 +1,48 @@
+@{
+    ViewData["Title"] = "Players";
+}
+
+<div id="topbar">
+    <a href="/">Back</a>
+</div>
+
+<div id="landing">
+    <h1>Players</h1>
+</div>
+
+<div id="flex-container">
+    <div id="flex-content">
+        <h3>Players in Lobby</h3>
+
+        @if (Model.PlayersInLobby.Count == 0) {
+            <p>No players in lobby.</p>
+        }
+        @foreach (var player in Model.PlayersInLobby) {
+            <a
+                href="player/info?id=@player.Id"
+                class="btn"
+            >@player.Username</a>
+        }
+
+        <h3>Players in Game</h3>
+
+        @if (Model.PlayersInGame.Count == 0) {
+            <p>No players in game.</p>
+        }
+        @foreach (var player in Model.PlayersInGame) {
+            <a
+                href="player/info?id=@player.Id"
+                class="btn"
+            >@player.Username</a>
+        }
+
+        <h3>Players</h3>
+
+        @foreach (var player in Model.Players) {
+            <a
+                href="player/info?id=@player.Id"
+                class="btn"
+            >@player.Username</a>
+        }
+    </div>
+</div>

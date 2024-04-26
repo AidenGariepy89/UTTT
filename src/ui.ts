@@ -1,3 +1,16 @@
+function backTopBar(): HTMLDivElement {
+    const topbar = document.createElement("div");
+    topbar.id = "topbar";
+
+    const backButton = document.createElement("a");
+    backButton.href = "/";
+    backButton.innerHTML = "Back";
+
+    topbar.appendChild(backButton);
+
+    return topbar;
+}
+
 export function spinnerElement(): HTMLDivElement {
     const spinner = document.createElement("div");
     spinner.className = "lds-spinner";
@@ -20,7 +33,14 @@ export function infoLoading(msg: string): HTMLDivElement {
     info.appendChild(infoMsg);
     info.appendChild(spinnerElement());
 
-    return info;
+    const topbar = backTopBar();
+
+    const container = document.createElement("div");
+    container.id = "container";
+    container.appendChild(topbar);
+    container.appendChild(info);
+
+    return container;
 }
 
 export function ultimateBoard(): HTMLDivElement {
@@ -37,5 +57,12 @@ export function ultimateBoard(): HTMLDivElement {
     boardContainer.appendChild(infoText);
     boardContainer.appendChild(ultimateBoard);
 
-    return boardContainer;
+    const topbar = backTopBar();
+
+    const container = document.createElement("div");
+    container.id = "container";
+    container.appendChild(topbar);
+    container.appendChild(boardContainer);
+
+    return container;
 }

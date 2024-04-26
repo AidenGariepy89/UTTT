@@ -1,4 +1,5 @@
 :root {
+    --col-gray: #e3e3e3;
     --col0: #ffffff;
     --col1: #707070;
     --col2: #12bcff;
@@ -9,6 +10,9 @@
     --col-highlight: #b8fce1;
     --col-x: #69ff87;
     --col-o: #e369ff;
+    --col-winner: #b3ffb6;
+    --col-loser: #ffb3b3;
+    --col-unfinished: #8dadf2;
 }
 
 html {
@@ -40,12 +44,165 @@ body {
     background: var(--col0);
 }
 
+/** SITE **/
+
+#landing {
+    height: 30%;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#options {
+    height: 70%;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+#options a {
+    width: 240px;
+    height: 80px;
+    border: 5px solid black;
+    border-radius: 5px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    color: black;
+    text-decoration: none;
+}
+
+#options a:hover {
+    background: var(--col-gray);
+}
+
+/** PLAYERS **/
+
+#flex-container {
+    display: flex;
+    justify-content: center;
+}
+
+#flex-content {
+    width: 40%;
+    background: var(--col-gray);
+    padding: 10px;
+    padding-bottom: 20px;
+    border-radius: 7px;
+}
+
+#flex-content a.btn {
+    background: var(--col3);
+    padding: 5px;
+    text-decoration: none;
+    color: black;
+    border-radius: 5px;
+}
+
+#flex-content a.btn:hover {
+    background: var(--col1);
+    color: white;
+}
+
+/** Player Info **/
+
+#playerinfo {
+    display: flex;
+    justify-content: left;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+
+a.game-info {
+    aspect-ratio: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 3px;
+    color: black;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+a.game-info.no-winner {
+    background: var(--col-unfinished);
+}
+
+a.game-info.winner {
+    background: var(--col-winner);
+}
+
+a.game-info.loser {
+    background: var(--col-loser);
+}
+
+a.game-info:hover {
+    background: var(--col1);
+}
+
+#scoreboard {
+    font-size: 52pt;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+#scoreboard div {
+    background: var(--col1);
+    color: white;
+    border-radius: 5px;
+    padding: 0 20px;
+}
+
+#scoreboard span.wins {
+    color: var(--col-winner);
+}
+
+#scoreboard span.losses {
+    color: var(--col-loser);
+}
+
+/** TIC TAC TOE **/
+
 #display {
     height: 100%;
 }
 
-#info {
+#container {
     height: 100%;
+}
+
+#topbar {
+    height: 7%;
+    display: flex;
+    justify-content: left;
+    align-items: center;
+}
+
+#topbar a {
+    border: 5px solid black;
+    border-radius: 5px;
+
+    margin: 3px;
+    padding: 10px;
+
+    color: black;
+    text-decoration: none;
+}
+
+#topbar a:hover {
+    background: var(--col-gray);
+}
+
+#info {
+    height: 92%;
 
     display: flex;
     justify-content: center;
@@ -57,7 +214,7 @@ body {
 }
 
 #board-container {
-    height: 100%;
+    height: 92%;
 
     display: flex;
     flex-direction: column;

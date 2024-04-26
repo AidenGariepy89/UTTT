@@ -17,9 +17,7 @@ public class HomeController : Controller
 
     public IActionResult Index()
     {
-        List<Player> players = _context.Players.ToList();
-
-        return View(players);
+        return View();
     }
 
     public IActionResult Privacy()
