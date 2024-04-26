@@ -10,14 +10,14 @@ public class SimplePlayer
     public string Username { get; set; } = null!;
 }
 
-public class IndexViewModel
+public class PlayerIndexViewModel
 {
     public List<SimplePlayer> PlayersInLobby { get; set; } = null!;
     public List<SimplePlayer> PlayersInGame { get; set; } = null!;
     public List<SimplePlayer> Players { get; set; } = null!;
 }
 
-public class InfoViewModel
+public class PlayerInfoViewModel
 {
     public Player Player { get; set; } = null!;
     public List<Game> Games { get; set; } = null!;
@@ -62,7 +62,7 @@ public class PlayerController : Controller
             from player"
         ).ToList();
 
-        var viewModel = new IndexViewModel();
+        var viewModel = new PlayerIndexViewModel();
         viewModel.PlayersInLobby = playersInLobby;
         viewModel.PlayersInGame = playersInGame;
         viewModel.Players = players;
@@ -105,7 +105,7 @@ public class PlayerController : Controller
             }
         }
 
-        var viewModel = new InfoViewModel();
+        var viewModel = new PlayerInfoViewModel();
         viewModel.Player = player;
         viewModel.Games = gamesPlayed;
         viewModel.GamesWon = gamesWon;

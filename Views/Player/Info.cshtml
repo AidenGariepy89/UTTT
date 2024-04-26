@@ -1,5 +1,5 @@
 @{
-    ViewData["Title"] = "Players";
+    ViewData["Title"] = "Player Info";
 }
 
 <div id="topbar">
@@ -10,8 +10,8 @@
     <h1>@Model.Player.Username</h1>
 </div>
 
-<div id="flex-container">
-    <div id="flex-content">
+<div class="flex-container">
+    <div class="flex-content">
         <div id="scoreboard">
             <div>
                 <span class="wins">@Model.GamesWon</span>
@@ -22,6 +22,9 @@
 
         <h3>Games Played</h3>
         <div id="playerinfo">
+            @if (Model.Games.Count == 0) {
+                <p>No games played yet!</p>
+            }
             @foreach (var game in Model.Games) {
                 @if (game.Winner is null) {
                     <a href="/game/info?gameId=@game.Id" class='game-info no-winner'>

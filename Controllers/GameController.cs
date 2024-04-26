@@ -1,8 +1,15 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using UTTT.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace UTTT.Controllers;
+
+public class GameInfoViewModel
+{
+    public Game Game { get; set; } = null!;
+    public int TotalMoves { get; set; }
+}
 
 public class GameController : Controller
 {
@@ -18,6 +25,37 @@ public class GameController : Controller
     public IActionResult Index()
     {
         return View();
+    }
+
+    public IActionResult Info(int gameId)
+    {
+        var games = _context.Games
+            .Include(g => g.XPlayerNavigation)
+            .Include(g => g.OPlayerNavigation)
+            .Include(g => g.WinnerNavigation)
+            .Where(g => g.Id == gameId)
+            .ToList();
+
+        Game game;
+
+        if (games.Count == 0)
+        {
+            return Redirect("/game/gameerror?msg=Game Not Found!");
+        }
+        else
+        {
+            game = games.First();
+        }
+
+        var totalMoves = _context.GameMoves
+            .Where(gm => gm.GameId == gameId)
+            .Count();
+
+        var viewModel = new GameInfoViewModel();
+        viewModel.Game = game;
+        viewModel.TotalMoves = totalMoves;
+
+        return View(viewModel);
     }
 
     public IActionResult GameError(string msg)

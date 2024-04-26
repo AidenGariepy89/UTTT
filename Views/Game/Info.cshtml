@@ -1,0 +1,44 @@
+@{
+    ViewData["Title"] = "Game Info";
+}
+
+<div id="topbar">
+    <a href="/player">Back</a>
+</div>
+
+<div id="landing">
+    <h1>
+        <a
+            href="/player/info?id=@Model.Game.XPlayerNavigation.Id"
+            class="btn"
+        >
+            @Model.Game.XPlayerNavigation.Username
+        </a>
+        vs.
+        <a
+            href="/player/info?id=@Model.Game.OPlayerNavigation.Id"
+            class="btn"
+        >
+            @Model.Game.OPlayerNavigation.Username
+        </a>
+    </h1>
+</div>
+
+<div class="flex-container">
+    <div class="flex-content">
+        @if (Model.Game.Winner is not null) {
+            <h3>
+                Winner:
+                <a
+                    href="/player/info?id=@Model.Game.WinnerNavigation.Id"
+                    class="btn"
+                >
+                    @Model.Game.WinnerNavigation.Username
+                </a>
+            </h3>
+        }
+
+        <h3>Total Moves Played:</h3>
+        <p>@Model.TotalMoves</p>
+    </div>
+</div>

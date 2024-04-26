@@ -84,12 +84,12 @@ body {
 
 /** PLAYERS **/
 
-#flex-container {
+.flex-container {
     display: flex;
     justify-content: center;
 }
 
-#flex-content {
+.flex-content {
     width: 40%;
     background: var(--col-gray);
     padding: 10px;
@@ -97,7 +97,7 @@ body {
     border-radius: 7px;
 }
 
-#flex-content a.btn {
+a.btn {
     background: var(--col3);
     padding: 5px;
     text-decoration: none;
@@ -105,7 +105,7 @@ body {
     border-radius: 5px;
 }
 
-#flex-content a.btn:hover {
+a.btn:hover {
     background: var(--col1);
     color: white;
 }
